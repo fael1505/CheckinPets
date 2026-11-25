@@ -7,6 +7,7 @@ import android.content.pm.PackageInstaller
 import android.os.Build
 import android.util.Log
 import com.app.check_inpets.MainActivity
+import com.app.check_inpets.background.AppForegroundTracker
 import com.app.check_inpets.di.AppContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,13 +32,22 @@ class AppUpdateInstallReceiver : BroadcastReceiver() {
                     intent.getParcelableExtra(Intent.EXTRA_INTENT)
                 }
                 if (confirmIntent != null) {
-                    confirmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    runCatching { context.startActivity(confirmIntent) }
+                    if (AppForegroundTracker.isForeground) {
+                        AppUpdateManager.emitInstallEvent(InstallCallbackEvent.ConfirmRequired(confirmIntent))
+                    } else {
+                        confirmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        runCatching { context.startActivity(confirmIntent) }
+                    }
+                } else {
+                    AppUpdateManager.emitInstallEvent(
+                        InstallCallbackEvent.Failed(status, "O sistema não retornou a tela de confirmação.")
+                    )
                 }
             }
 
             PackageInstaller.STATUS_SUCCESS -> {
                 val appContext = context.applicationContext
+                AppUpdateManager.emitInstallEvent(InstallCallbackEvent.Succeeded)
                 CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
                     AppContainer.getInstance(appContext).preferencesDataStore
                         .setPendingRestartAfterUpdate(false)
@@ -54,6 +64,16 @@ class AppUpdateInstallReceiver : BroadcastReceiver() {
                     AppContainer.getInstance(appContext).preferencesDataStore
                         .setPendingRestartAfterUpdate(false)
                 }
+                val friendlyMessage = when (status) {
+                    PackageInstaller.STATUS_FAILURE_ABORTED -> "Instalação cancelada."
+                    PackageInstaller.STATUS_FAILURE_CONFLICT ->
+                        "Assinatura incompatível com o APK instalado. Desinstale o app atual e instale a nova versão manualmente."
+                    PackageInstaller.STATUS_FAILURE_STORAGE ->
+                        "Espaço insuficiente no dispositivo para instalar a atualização."
+                    else -> message?.takeIf { it.isNotBlank() }
+                        ?: "Falha na instalação (código $status)."
+                }
+                AppUpdateManager.emitInstallEvent(InstallCallbackEvent.Failed(status, friendlyMessage))
             }
         }
     }

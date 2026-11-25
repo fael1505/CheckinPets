@@ -18,6 +18,7 @@ import com.app.check_inpets.model.TurnStatus
 import com.app.check_inpets.notifications.PetCareNotificationHelper
 import com.app.check_inpets.update.AppUpdateManager
 import com.app.check_inpets.update.AppUpdateState
+import com.app.check_inpets.update.InstallCallbackEvent
 import com.app.check_inpets.update.RemoteAppVersion
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -64,11 +65,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateState: StateFlow<AppUpdateState> = _updateState
     private val _events = MutableSharedFlow<String>()
     val events = _events.asSharedFlow()
+    private val _installConfirmIntents = MutableSharedFlow<android.content.Intent>(extraBufferCapacity = 1)
+    val installConfirmIntents = _installConfirmIntents.asSharedFlow()
 
     init {
         viewModelScope.launch {
             AppUpdateManager.foregroundUpdates.collect { update ->
                 _updateState.value = update
+            }
+        }
+        viewModelScope.launch {
+            AppUpdateManager.installEvents.collect { event ->
+                when (event) {
+                    is InstallCallbackEvent.ConfirmRequired -> {
+                        _updateState.value = AppUpdateState.Idle
+                        _installConfirmIntents.tryEmit(event.intent)
+                    }
+                    is InstallCallbackEvent.Failed -> {
+                        _updateState.value = AppUpdateState.Idle
+                        _events.emit(event.message)
+                    }
+                    InstallCallbackEvent.Succeeded -> {
+                        _updateState.value = AppUpdateState.Idle
+                    }
+                }
             }
         }
         checkForAppUpdate(manual = false)

@@ -183,6 +183,18 @@ private fun CheckinPetsApp(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.installConfirmIntents.collect { confirmIntent ->
+            runCatching {
+                context.startActivity(confirmIntent)
+            }.onFailure { err ->
+                snackbarHostState.showSnackbar(
+                    err.message ?: "Não foi possível abrir o instalador do Android."
+                )
+            }
+        }
+    }
+
     val currentUser = uiState.currentUser
 
     LaunchedEffect(

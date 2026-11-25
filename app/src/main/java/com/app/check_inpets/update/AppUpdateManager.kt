@@ -72,6 +72,12 @@ sealed interface AppUpdateState {
     data class Error(val message: String) : AppUpdateState
 }
 
+sealed interface InstallCallbackEvent {
+    data class ConfirmRequired(val intent: Intent) : InstallCallbackEvent
+    data class Failed(val status: Int, val message: String) : InstallCallbackEvent
+    data object Succeeded : InstallCallbackEvent
+}
+
 object AppUpdateManager {
 
     const val GITHUB_OWNER = "fael1505"
@@ -84,8 +90,15 @@ object AppUpdateManager {
     private val _foregroundUpdates = MutableSharedFlow<AppUpdateState.UpdateAvailable>(extraBufferCapacity = 1)
     val foregroundUpdates = _foregroundUpdates.asSharedFlow()
 
+    private val _installEvents = MutableSharedFlow<InstallCallbackEvent>(extraBufferCapacity = 4)
+    val installEvents = _installEvents.asSharedFlow()
+
     fun notifyForegroundUpdateAvailable(update: AppUpdateState.UpdateAvailable) {
         _foregroundUpdates.tryEmit(update)
+    }
+
+    fun emitInstallEvent(event: InstallCallbackEvent) {
+        _installEvents.tryEmit(event)
     }
 
     fun getCurrentVersion(context: Context): CurrentAppVersion {
