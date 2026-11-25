@@ -54,22 +54,6 @@ class TurnAlarmReceiver : BroadcastReceiver() {
                         )
                     }
 
-                    TurnAlarmScheduler.ACTION_NOTIFICATION_CARED -> {
-                        TurnBackgroundCoordinator.handleNotificationCared(
-                            context = appContext,
-                            slotTime = slotTime,
-                            escalationId = escalationId
-                        )
-                    }
-
-                    TurnAlarmScheduler.ACTION_NOTIFICATION_DECLINE -> {
-                        TurnBackgroundCoordinator.handleNotificationDecline(
-                            context = appContext,
-                            slotTime = slotTime,
-                            escalationId = escalationId
-                        )
-                    }
-
                     TurnAlarmScheduler.ACTION_NOTIFICATION_REPOST -> {
                         TurnBackgroundCoordinator.handleNotificationRepost(
                             context = appContext,

@@ -6,7 +6,12 @@ O app verifica novas versões diretamente em:
 ## Configuração única (primeira vez)
 
 1. Crie o repositório público **`CheckinPets`** na sua conta GitHub (`https://github.com/new`).
-2. Na raiz do projeto (`C:\Users\rafae\AndroidStudioProjects\CheckinPets`), envie o projeto para o GitHub:
+2. Configure o secret **`GOOGLE_SERVICES_JSON`** no GitHub (**Settings → Secrets and variables → Actions → New repository secret**), colando o conteúdo de `app/google-services.json` codificado em Base64:
+   ```powershell
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\Users\rafae\AndroidStudioProjects\CheckinPets\app\google-services.json")) | Set-Clipboard
+   ```
+   *(Isso evita expor `app/google-services.json` no repositório público, permitindo que o GitHub Actions reidrate o arquivo apenas durante o build).*
+3. Na raiz do projeto (`C:\Users\rafae\AndroidStudioProjects\CheckinPets`), envie o projeto para o GitHub:
    ```powershell
    git init
    git add .

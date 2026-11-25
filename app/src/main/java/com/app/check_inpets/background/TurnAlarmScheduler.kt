@@ -22,8 +22,6 @@ object TurnAlarmScheduler {
     const val ACTION_REMINDER_10M = "com.app.check_inpets.ACTION_REMINDER_10M"
     const val ACTION_SNOOZE_REMINDER = "com.app.check_inpets.ACTION_SNOOZE_REMINDER"
     const val ACTION_SNOOZE_CLICKED = "com.app.check_inpets.ACTION_SNOOZE_CLICKED"
-    const val ACTION_NOTIFICATION_CARED = "com.app.check_inpets.ACTION_NOTIFICATION_CARED"
-    const val ACTION_NOTIFICATION_DECLINE = "com.app.check_inpets.ACTION_NOTIFICATION_DECLINE"
     const val ACTION_NOTIFICATION_REPOST = "com.app.check_inpets.ACTION_NOTIFICATION_REPOST"
     const val ACTION_SYNC_PENDING_ALERT = "com.app.check_inpets.ACTION_SYNC_PENDING_ALERT"
     const val ACTION_CHECK_APP_UPDATE = "com.app.check_inpets.ACTION_CHECK_APP_UPDATE"
@@ -82,9 +80,7 @@ object TurnAlarmScheduler {
             val slotMillisToday = slotZonedToday.toInstant().toEpochMilli()
             val reminderMillisToday = slotMillisToday + TEN_MINUTES_MILLIS
 
-            val alreadyHandledToday = hasCaredForSlot(logs, slotTime, today, zoneId) ||
-                hasDeclinedSlot(escalations, currentUser.id, slotTime, todayKey) ||
-                dismissedSlotKey == "${todayKey}_$slotTime"
+            val alreadyHandledToday = hasCaredForSlot(logs, slotTime, today, zoneId)
 
             val nextSlotMillis: Long
             val nextReminderMillis: Long

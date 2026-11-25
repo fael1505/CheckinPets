@@ -187,20 +187,6 @@ object PetCareNotificationHelper {
             openHomeFromAlert = true,
             slotTime = slotTime
         )
-        val caredPendingIntent = createNotificationActionPendingIntent(
-            context = context,
-            requestCode = 3007,
-            action = TurnAlarmScheduler.ACTION_NOTIFICATION_CARED,
-            slotTime = slotTime,
-            escalationId = escalationId
-        )
-        val declinePendingIntent = createNotificationActionPendingIntent(
-            context = context,
-            requestCode = 3008,
-            action = TurnAlarmScheduler.ACTION_NOTIFICATION_DECLINE,
-            slotTime = slotTime,
-            escalationId = escalationId
-        )
         val deletePendingIntent = createNotificationActionPendingIntent(
             context = context,
             requestCode = 3009,
@@ -209,18 +195,14 @@ object PetCareNotificationHelper {
             escalationId = escalationId
         )
 
-        val contentText = if (!slotTime.isNullOrBlank()) {
-            val formattedSlot = TimeFormatting.formatBrasiliaSlotForDevice(slotTime)
-            "Horário das $formattedSlot — responda abaixo ou no app para fechar este aviso."
-        } else {
-            "Responda abaixo ou no app para fechar este aviso."
+        val formattedSlot = slotTime?.takeIf { it.isNotBlank() }?.let {
+            TimeFormatting.formatBrasiliaSlotForDevice(it)
         }
 
         val notification = NotificationCompat.Builder(context, CHANNEL_REMINDER_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Já cuidou dos cachorros?")
-            .setContentText(contentText)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
+            .setContentTitle("Horário do cuidado")
+            .setContentText(formattedSlot ?: "Agora")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setVibrate(if (vibrate) VIBRATION_PATTERN else longArrayOf(0L))
@@ -229,8 +211,6 @@ object PetCareNotificationHelper {
             .setAutoCancel(false)
             .setDeleteIntent(deletePendingIntent)
             .setContentIntent(pendingIntent)
-            .addAction(0, "Cuidei", caredPendingIntent)
-            .addAction(0, "Não irei cuidar", declinePendingIntent)
             .build()
 
         NotificationManagerCompat.from(context).notify(REMINDER_NOTIFICATION_ID, notification)
