@@ -42,6 +42,17 @@ jobs:
           fi
           printf '%s' "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
 
+      - name: Decode Android debug.keystore
+        env:
+          ANDROID_DEBUG_KEYSTORE: ${{ secrets.ANDROID_DEBUG_KEYSTORE }}
+        run: |
+          if [ -z "$ANDROID_DEBUG_KEYSTORE" ]; then
+            echo "::error::Secret ANDROID_DEBUG_KEYSTORE nao configurado em Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          mkdir -p "$HOME/.android"
+          printf '%s' "$ANDROID_DEBUG_KEYSTORE" | base64 --decode > "$HOME/.android/debug.keystore"
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon
 

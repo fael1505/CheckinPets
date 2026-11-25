@@ -11,7 +11,11 @@ O app verifica novas versões diretamente em:
    [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\Users\rafae\AndroidStudioProjects\CheckinPets\app\google-services.json")) | Set-Clipboard
    ```
    *(Isso evita expor `app/google-services.json` no repositório público, permitindo que o GitHub Actions reidrate o arquivo apenas durante o build).*
-3. Na raiz do projeto (`C:\Users\rafae\AndroidStudioProjects\CheckinPets`), envie o projeto para o GitHub:
+3. Configure também o secret **`ANDROID_DEBUG_KEYSTORE`** com o Base64 do seu `debug.keystore` local (para manter o mesmo SHA-1 e assinatura em todas as atualizações):
+   ```powershell
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\.android\debug.keystore")) | Set-Clipboard
+   ```
+4. Na raiz do projeto (`C:\Users\rafae\AndroidStudioProjects\CheckinPets`), envie o projeto para o GitHub:
    ```powershell
    git init
    git add .
