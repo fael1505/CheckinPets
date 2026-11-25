@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Fundo circular em gradiente terracota -->
+    <path android:pathData="M54,54m-48,0a48,48 0,1 1,96 0a48,48 0,1 1,-96 0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="92"
+                android:endY="96"
+                android:startX="16"
+                android:startY="12"
+                android:type="linear">
+                <item
+                    android:color="#FFE38A54"
+                    android:offset="0.0" />
+                <item
+                    android:color="#FFD97742"
+                    android:offset="0.55" />
+                <item
+                    android:color="#FFB55A2A"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 4 dedinhos da patinha em arco -->
+    <group
+        android:pivotX="35.5"
+        android:pivotY="40.5"
+        android:rotation="-24">
+        <path
+            android:fillColor="#FFFBF6"
+            android:pathData="M35.5,35c2.4,0 4.3,2.45 4.3,5.5c0,3.05 -1.9,5.5 -4.3,5.5c-2.4,0 -4.3,-2.45 -4.3,-5.5C31.2,37.45 33.1,35 35.5,35Z" />
+    </group>
+    <group
+        android:pivotX="46.2"
+        android:pivotY="32"
+        android:rotation="-8">
+        <path
+            android:fillColor="#FFFBF6"
+            android:pathData="M46.2,26.3c2.5,0 4.5,2.55 4.5,5.7c0,3.15 -2,5.7 -4.5,5.7c-2.5,0 -4.5,-2.55 -4.5,-5.7C41.7,28.85 43.7,26.3 46.2,26.3Z" />
+    </group>
+    <group
+        android:pivotX="61.8"
+        android:pivotY="32"
+        android:rotation="8">
+        <path
+            android:fillColor="#FFFBF6"
+            android:pathData="M61.8,26.3c2.5,0 4.5,2.55 4.5,5.7c0,3.15 -2,5.7 -4.5,5.7c-2.5,0 -4.5,-2.55 -4.5,-5.7C57.3,28.85 59.3,26.3 61.8,26.3Z" />
+    </group>
+    <group
+        android:pivotX="72.5"
+        android:pivotY="40.5"
+        android:rotation="24">
+        <path
+            android:fillColor="#FFFBF6"
+            android:pathData="M72.5,35c2.4,0 4.3,2.45 4.3,5.5c0,3.05 -1.9,5.5 -4.3,5.5c-2.4,0 -4.3,-2.45 -4.3,-5.5C68.2,37.45 70.1,35 72.5,35Z" />
+    </group>
+
+    <!-- Almofada principal da patinha fundida ao Pin de Check-in -->
+    <path
+        android:fillColor="#FFFBF6"
+        android:pathData="M54,41C44.6,41 37,48.3 37,56.8C37,66.7 48.6,76.8 52.8,80.6C53.48,81.22 54.52,81.22 55.2,80.6C59.4,76.8 71,66.7 71,56.8C71,48.3 63.4,41 54,41Z" />
+
+    <!-- Checkmark (✓) integrado ao centro -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M46,56.8L51.5,62.3L62.8,50.3"
+        android:strokeWidth="4.3"
+        android:strokeColor="#C66330"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+</vector>

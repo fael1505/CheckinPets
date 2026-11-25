@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Fusão única: Patinha de Pet cuja almofada central é o Pin de Check-in com ✓ -->
+
+    <!-- 4 dedinhos da patinha em arco -->
+    <group
+        android:pivotX="36"
+        android:pivotY="41"
+        android:rotation="-24">
+        <path
+            android:fillColor="#FFFBF6"
+            android:pathData="M36,35.5c2.4,0 4.3,2.45 4.3,5.5c0,3.05 -1.9,5.5 -4.3,5.5c-2.4,0 -4.3,-2.45 -4.3,-5.5C31.7,37.95 33.6,35.5 36,35.5Z" />
+    </group>
+
+    <group
+        android:pivotX="46.5"
+        android:pivotY="32.5"
+        android:rotation="-8">
+        <path
+            android:fillColor="#FFFBF6"
+            android:pathData="M46.5,26.8c2.5,0 4.5,2.55 4.5,5.7c0,3.15 -2,5.7 -4.5,5.7c-2.5,0 -4.5,-2.55 -4.5,-5.7C42,29.35 44,26.8 46.5,26.8Z" />
+    </group>
+
+    <group
+        android:pivotX="61.5"
+        android:pivotY="32.5"
+        android:rotation="8">
+        <path
+            android:fillColor="#FFFBF6"
+            android:pathData="M61.5,26.8c2.5,0 4.5,2.55 4.5,5.7c0,3.15 -2,5.7 -4.5,5.7c-2.5,0 -4.5,-2.55 -4.5,-5.7C57,29.35 59,26.8 61.5,26.8Z" />
+    </group>
+
+    <group
+        android:pivotX="72"
+        android:pivotY="41"
+        android:rotation="24">
+        <path
+            android:fillColor="#FFFBF6"
+            android:pathData="M72,35.5c2.4,0 4.3,2.45 4.3,5.5c0,3.05 -1.9,5.5 -4.3,5.5c-2.4,0 -4.3,-2.45 -4.3,-5.5C67.7,37.95 69.6,35.5 72,35.5Z" />
+    </group>
+
+    <!-- Almofada principal da patinha fundida ao formato de Pin de Check-in -->
+    <path
+        android:fillColor="#FFFBF6"
+        android:pathData="M54,41.5C44.8,41.5 37.5,48.6 37.5,56.8C37.5,66.4 48.8,76.3 52.8,79.9C53.48,80.52 54.52,80.52 55.2,79.9C59.2,76.3 70.5,66.4 70.5,56.8C70.5,48.6 63.2,41.5 54,41.5Z" />
+
+    <!-- Checkmark (✓) integrado ao centro da almofada/pin -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M46.2,56.8L51.5,62.2L62.5,50.5"
+        android:strokeWidth="4.2"
+        android:strokeColor="#C66330"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+</vector>

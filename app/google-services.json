@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1091360710789",
+    "project_id": "check-in-pets-a22fb",
+    "storage_bucket": "check-in-pets-a22fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091360710789:android:77246d38cfc353c36bc9ec",
+        "android_client_info": {
+          "package_name": "com.app.check_inpets"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQYNDfa3VhAz2SZXNxxdTgZ8tuxW4V3XY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
