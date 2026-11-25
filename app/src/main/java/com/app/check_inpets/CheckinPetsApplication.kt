@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class CheckinPetsApplication : Application(), Application.ActivityLifecycleCallbacks {
@@ -69,7 +70,19 @@ class CheckinPetsApplication : Application(), Application.ActivityLifecycleCallb
                     val hasPending = when (turnStatus) {
                         is com.app.check_inpets.model.TurnStatus.MyScheduledTurn ->
                             dismissedKey != "${todayKey}_${turnStatus.slotTime}"
-                        is com.app.check_inpets.model.TurnStatus.EscalatedToMe -> true
+                        is com.app.check_inpets.model.TurnStatus.EscalatedToMe -> {
+                            val notificationsEnabled = container.preferencesDataStore.notificationsEnabled.first()
+                            val lastEscId = container.preferencesDataStore.lastEscalationNotifiedId.first()
+                            if (notificationsEnabled && lastEscId != turnStatus.escalation.id) {
+                                container.preferencesDataStore.setLastEscalationNotifiedId(turnStatus.escalation.id)
+                                PetCareNotificationHelper.showEscalatedToMeNotification(
+                                    context = applicationContext,
+                                    slotTime = turnStatus.escalation.slotTime,
+                                    escalationId = turnStatus.escalation.id
+                                )
+                            }
+                            true
+                        }
                         is com.app.check_inpets.model.TurnStatus.NotMyTurn -> {
                             val pendingSlot = turnStatus.pendingSlotTime
                             turnStatus.hasUncaredPendingTurn &&

@@ -27,21 +27,12 @@ class PetCareMessagingService : FirebaseMessagingService() {
         serviceScope.launch {
             val notificationsEnabled = container.preferencesDataStore.notificationsEnabled.first()
             if (notificationsEnabled) {
-                val title = message.notification?.title
-                    ?: "Sua vez de cuidar dos cachorros!"
-                val declinedBy = message.data["declinedByName"]
                 val slotTime = message.data["slotTime"]
-                val body = message.notification?.body
-                    ?: if (!declinedBy.isNullOrBlank()) {
-                        "$declinedBy não poderá cuidar (${slotTime ?: "agora"}). Você é o próximo da fila!"
-                    } else {
-                        "Alguém recusou o turno e agora é a sua vez de cuidar dos pets."
-                    }
-
-                PetCareNotificationHelper.showTurnEscalationNotification(
+                val escalationId = message.data["escalationId"] ?: "fcm_${System.currentTimeMillis()}"
+                PetCareNotificationHelper.showEscalatedToMeNotification(
                     context = applicationContext,
-                    title = title,
-                    body = body
+                    slotTime = slotTime,
+                    escalationId = escalationId
                 )
             }
             container.repository.refresh()

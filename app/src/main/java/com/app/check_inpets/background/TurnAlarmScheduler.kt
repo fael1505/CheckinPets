@@ -35,7 +35,7 @@ object TurnAlarmScheduler {
     private const val REQUEST_CODE_SYNC_ALERT = 3006
     private const val REQUEST_CODE_UPDATE_12H = 3010
 
-    const val TWO_MINUTES_MILLIS = 2 * 60_000L
+    const val ONE_MINUTE_MILLIS = 60_000L
     const val FIVE_MINUTES_MILLIS = 5 * 60_000L
     const val TEN_MINUTES_MILLIS = 10 * 60_000L
 
@@ -182,7 +182,7 @@ object TurnAlarmScheduler {
         context: Context,
         slotTime: String?,
         escalationId: String?,
-        delayMillis: Long = TWO_MINUTES_MILLIS
+        delayMillis: Long = ONE_MINUTE_MILLIS
     ) {
         scheduleExact(
             context = context,

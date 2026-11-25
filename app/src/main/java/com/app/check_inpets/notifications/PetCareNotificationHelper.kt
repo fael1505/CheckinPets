@@ -166,6 +166,21 @@ object PetCareNotificationHelper {
         )
     }
 
+    @SuppressLint("MissingPermission")
+    fun showEscalatedToMeNotification(
+        context: Context,
+        slotTime: String?,
+        escalationId: String
+    ) {
+        postSingleReminderNotification(
+            context = context,
+            slotTime = slotTime,
+            escalationId = escalationId,
+            onlyAlertOnce = false,
+            vibrate = true
+        )
+    }
+
     fun buildOngoingReminderNotification(
         context: Context,
         slotTime: String?,
@@ -191,11 +206,16 @@ object PetCareNotificationHelper {
         val formattedSlot = slotTime?.takeIf { it.isNotBlank() }?.let {
             TimeFormatting.formatBrasiliaSlotForDevice(it)
         }
+        val contentText = if (!escalationId.isNullOrBlank()) {
+            "A vez foi passada para você."
+        } else {
+            formattedSlot ?: "Agora"
+        }
 
         return NotificationCompat.Builder(context, CHANNEL_REMINDER_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Hora de cuidar dos cachorros")
-            .setContentText(formattedSlot ?: "Agora")
+            .setContentText(contentText)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setVibrate(if (vibrate) VIBRATION_PATTERN else longArrayOf(0L))

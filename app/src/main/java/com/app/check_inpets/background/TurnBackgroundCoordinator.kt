@@ -349,6 +349,28 @@ object TurnBackgroundCoordinator {
             }
         } else {
             Log.d("CheckinPetsBg", "syncPendingAlertInBackground: still pending, keeping notification & rescheduling sync")
+            if (user != null) {
+                val turnStatus = TurnResolver.resolveTurnStatus(
+                    currentUser = user,
+                    allCaregivers = snapshot.caregivers,
+                    logs = snapshot.careLogs,
+                    todayEscalations = snapshot.escalations,
+                    nowMillis = nowMillis,
+                    zoneId = zone
+                )
+                if (turnStatus is TurnStatus.EscalatedToMe) {
+                    val notificationsEnabled = container.preferencesDataStore.notificationsEnabled.first()
+                    val lastEscId = container.preferencesDataStore.lastEscalationNotifiedId.first()
+                    if (notificationsEnabled && lastEscId != turnStatus.escalation.id) {
+                        container.preferencesDataStore.setLastEscalationNotifiedId(turnStatus.escalation.id)
+                        PetCareNotificationHelper.showEscalatedToMeNotification(
+                            context = appContext,
+                            slotTime = turnStatus.escalation.slotTime,
+                            escalationId = turnStatus.escalation.id
+                        )
+                    }
+                }
+            }
             TurnAlarmScheduler.schedulePendingAlertSync(appContext, slotTime, escalationId)
         }
     }

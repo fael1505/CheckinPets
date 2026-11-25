@@ -25,6 +25,7 @@ class UserPreferencesDataStore(private val context: Context) {
         val SNOOZE_UNTIL_MILLIS = longPreferencesKey("snooze_until_millis")
         val DISMISSED_SLOT_KEY = stringPreferencesKey("dismissed_slot_key")
         val PENDING_RESTART_AFTER_UPDATE = booleanPreferencesKey("pending_restart_after_update")
+        val LAST_ESCALATION_NOTIFIED_ID = stringPreferencesKey("last_escalation_notified_id")
     }
 
     val linkedCaregiverId: Flow<String?> = context.dataStore.data.map { prefs ->
@@ -61,6 +62,10 @@ class UserPreferencesDataStore(private val context: Context) {
 
     val pendingRestartAfterUpdate: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[Keys.PENDING_RESTART_AFTER_UPDATE] ?: false
+    }
+
+    val lastEscalationNotifiedId: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[Keys.LAST_ESCALATION_NOTIFIED_ID]
     }
 
     suspend fun setLinkedCaregiverId(id: String?) {
@@ -136,12 +141,23 @@ class UserPreferencesDataStore(private val context: Context) {
         }
     }
 
+    suspend fun setLastEscalationNotifiedId(id: String?) {
+        context.dataStore.edit { prefs ->
+            if (id == null) {
+                prefs.remove(Keys.LAST_ESCALATION_NOTIFIED_ID)
+            } else {
+                prefs[Keys.LAST_ESCALATION_NOTIFIED_ID] = id
+            }
+        }
+    }
+
     suspend fun clearTurnPromptKeys() {
         context.dataStore.edit { prefs ->
             prefs.remove(Keys.LAST_AUTO_OPEN_SLOT_KEY)
             prefs.remove(Keys.LAST_REMINDER_SLOT_KEY)
             prefs.remove(Keys.SNOOZE_UNTIL_MILLIS)
             prefs.remove(Keys.DISMISSED_SLOT_KEY)
+            prefs.remove(Keys.LAST_ESCALATION_NOTIFIED_ID)
         }
     }
 }
