@@ -375,6 +375,20 @@ private fun AppUpdateDialogs(
     onOpenInstallPermission: () -> Unit
 ) {
     when (updateState) {
+        is AppUpdateState.Checking -> {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text("Verificando atualização...") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text("Buscando nova versão no servidor...")
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
+                },
+                confirmButton = {}
+            )
+        }
+
         is AppUpdateState.UpdateAvailable -> {
             AlertDialog(
                 onDismissRequest = onDismiss,
@@ -419,11 +433,16 @@ private fun AppUpdateDialogs(
                 title = { Text("Baixando atualização...") },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("Versão v${updateState.remote.versionName} • ${updateState.progressPercent}%")
-                        LinearProgressIndicator(
-                            progress = { updateState.progressPercent / 100f },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        if (updateState.progressPercent >= 0) {
+                            Text("Versão v${updateState.remote.versionName} • ${updateState.progressPercent}%")
+                            LinearProgressIndicator(
+                                progress = { updateState.progressPercent / 100f },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else {
+                            Text("Baixando versão v${updateState.remote.versionName}...")
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
                     }
                 },
                 confirmButton = {}
@@ -455,12 +474,9 @@ private fun AppUpdateDialogs(
                 onDismissRequest = {},
                 title = { Text("Instalando v${updateState.remote.versionName}...") },
                 text = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        CircularProgressIndicator()
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text("Preparando instalação e reinício automático...")
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
                 },
                 confirmButton = {}

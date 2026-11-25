@@ -3,6 +3,7 @@ package com.app.check_inpets.notifications
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityOptions
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -19,6 +20,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.app.check_inpets.MainActivity
 import com.app.check_inpets.R
+import com.app.check_inpets.background.PetCareBackgroundService
 import com.app.check_inpets.background.TurnAlarmReceiver
 import com.app.check_inpets.background.TurnAlarmScheduler
 import com.app.check_inpets.ui.components.TimeFormatting
@@ -164,23 +166,14 @@ object PetCareNotificationHelper {
         )
     }
 
-    @SuppressLint("MissingPermission")
-    private fun postSingleReminderNotification(
+    fun buildOngoingReminderNotification(
         context: Context,
         slotTime: String?,
         escalationId: String?,
         onlyAlertOnce: Boolean,
-        vibrate: Boolean = true
-    ) {
+        vibrate: Boolean
+    ): Notification {
         ensureChannels(context)
-        if (vibrate) {
-            vibratePhone(context)
-        }
-
-        val hasPerm = hasPostNotificationPermission(context)
-        Log.d("CheckinPetsBg", "postSingleReminderNotification: hasPerm=$hasPerm")
-        if (!hasPerm) return
-
         val pendingIntent = createOpenAppPendingIntent(
             context = context,
             requestCode = REMINDER_NOTIFICATION_ID,
@@ -199,7 +192,7 @@ object PetCareNotificationHelper {
             TimeFormatting.formatBrasiliaSlotForDevice(it)
         }
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_REMINDER_ID)
+        return NotificationCompat.Builder(context, CHANNEL_REMINDER_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Hora de cuidar dos cachorros")
             .setContentText(formattedSlot ?: "Agora")
@@ -211,9 +204,37 @@ object PetCareNotificationHelper {
             .setAutoCancel(false)
             .setDeleteIntent(deletePendingIntent)
             .setContentIntent(pendingIntent)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun postSingleReminderNotification(
+        context: Context,
+        slotTime: String?,
+        escalationId: String?,
+        onlyAlertOnce: Boolean,
+        vibrate: Boolean = true
+    ) {
+        ensureChannels(context)
+        if (vibrate) {
+            vibratePhone(context)
+        }
+
+        val hasPerm = hasPostNotificationPermission(context)
+        Log.d("CheckinPetsBg", "postSingleReminderNotification: hasPerm=$hasPerm")
+        if (!hasPerm) return
+
+        val notification = buildOngoingReminderNotification(
+            context = context,
+            slotTime = slotTime,
+            escalationId = escalationId,
+            onlyAlertOnce = onlyAlertOnce,
+            vibrate = vibrate
+        )
 
         NotificationManagerCompat.from(context).notify(REMINDER_NOTIFICATION_ID, notification)
+        PetCareBackgroundService.start(context, slotTime, escalationId)
         TurnAlarmScheduler.schedulePendingAlertSync(context, slotTime, escalationId)
     }
 
@@ -257,6 +278,7 @@ object PetCareNotificationHelper {
     }
 
     fun dismissAllTurnNotifications(context: Context) {
+        PetCareBackgroundService.stop(context)
         cancelReminderNotification(context)
         cancelTurnArrivedNotification(context)
         TurnAlarmScheduler.cancelPendingAlertSync(context)

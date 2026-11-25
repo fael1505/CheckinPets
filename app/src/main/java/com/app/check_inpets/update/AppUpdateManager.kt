@@ -197,6 +197,9 @@ object AppUpdateManager {
                     error("Falha no download do APK (HTTP $code).")
                 }
                 val totalBytes = conn.contentLengthLong
+                if (totalBytes <= 0L) {
+                    onProgress(-1)
+                }
                 var downloaded = 0L
                 var lastReported = -1
 

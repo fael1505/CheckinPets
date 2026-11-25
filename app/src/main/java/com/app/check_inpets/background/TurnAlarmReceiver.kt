@@ -15,6 +15,11 @@ class TurnAlarmReceiver : BroadcastReceiver() {
         val slotTime = intent.getStringExtra(TurnAlarmScheduler.EXTRA_SLOT_TIME)
         val escalationId = intent.getStringExtra(TurnAlarmScheduler.EXTRA_ESCALATION_ID)
 
+        if (action == TurnAlarmScheduler.ACTION_NOTIFICATION_REPOST) {
+            com.app.check_inpets.notifications.PetCareNotificationHelper
+                .repostOngoingNotificationSilently(context.applicationContext, slotTime, escalationId)
+        }
+
         val pendingResult = goAsync()
         val appContext = context.applicationContext
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
