@@ -52,10 +52,14 @@ object TurnBackgroundCoordinator {
         val nowMillis = System.currentTimeMillis()
         val today = Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate()
         val todayKey = TurnResolver.todayKey(nowMillis, zone)
+        val dismissedKey = container.preferencesDataStore.dismissedSlotKey.first()
 
         val alreadyCared = TurnAlarmScheduler.hasCaredForSlot(snapshot.careLogs, activeSlotTime, today, zone)
+        val alreadyDeclined = user != null &&
+            TurnAlarmScheduler.hasDeclinedSlot(snapshot.escalations, user.id, activeSlotTime, todayKey)
+        val alreadyDismissed = dismissedKey == "${todayKey}_$activeSlotTime"
 
-        if (alreadyCared) {
+        if (alreadyCared || alreadyDeclined || alreadyDismissed) {
             PetCareNotificationHelper.dismissAllTurnNotifications(appContext)
             if (user != null) {
                 TurnAlarmScheduler.syncSchedule(
@@ -314,6 +318,8 @@ object TurnBackgroundCoordinator {
         val zone = TurnResolver.BRASILIA_ZONE
         val nowMillis = System.currentTimeMillis()
         val today = Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate()
+        val todayKey = TurnResolver.todayKey(nowMillis, zone)
+        val dismissedKey = container.preferencesDataStore.dismissedSlotKey.first()
 
         val stillPending = isAlertStillPending(
             user = user,
@@ -321,6 +327,8 @@ object TurnBackgroundCoordinator {
             escalationId = escalationId,
             snapshot = snapshot,
             today = today,
+            todayKey = todayKey,
+            dismissedKey = dismissedKey,
             nowMillis = nowMillis,
             zone = zone
         )
@@ -358,8 +366,10 @@ object TurnBackgroundCoordinator {
         val zone = TurnResolver.BRASILIA_ZONE
         val nowMillis = System.currentTimeMillis()
         val today = Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate()
+        val todayKey = TurnResolver.todayKey(nowMillis, zone)
+        val dismissedKey = container.preferencesDataStore.dismissedSlotKey.first()
 
-        if (isAlertStillPending(user, slotTime, escalationId, snapshot, today, nowMillis, zone)) {
+        if (isAlertStillPending(user, slotTime, escalationId, snapshot, today, todayKey, dismissedKey, nowMillis, zone)) {
             PetCareNotificationHelper.repostOngoingNotificationSilently(appContext, slotTime, escalationId)
         }
     }
@@ -370,13 +380,18 @@ object TurnBackgroundCoordinator {
         escalationId: String?,
         snapshot: com.app.check_inpets.data.repository.PetCareSnapshot,
         today: java.time.LocalDate,
+        todayKey: String,
+        dismissedKey: String?,
         nowMillis: Long,
         zone: ZoneId
     ): Boolean {
         val activeSlot = slotTime?.takeIf { it.isNotBlank() }
             ?: escalationId?.let { id -> snapshot.escalations.firstOrNull { it.id == id }?.slotTime }
         if (activeSlot != null) {
-            return !TurnAlarmScheduler.hasCaredForSlot(snapshot.careLogs, activeSlot, today, zone)
+            if (TurnAlarmScheduler.hasCaredForSlot(snapshot.careLogs, activeSlot, today, zone)) return false
+            if (user != null && TurnAlarmScheduler.hasDeclinedSlot(snapshot.escalations, user.id, activeSlot, todayKey)) return false
+            if (dismissedKey == "${todayKey}_$activeSlot") return false
+            return true
         }
         if (user != null) {
             val turnStatus = TurnResolver.resolveTurnStatus(

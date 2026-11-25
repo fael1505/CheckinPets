@@ -239,7 +239,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun declineCurrentTurn() {
         val state = uiState.value
         val user = state.currentUser ?: return
-        val (slotTime, escalationId) = when (val turn = state.turnStatus) {
+        val turn = state.turnStatus
+
+        if (turn is TurnStatus.NotMyTurn) {
+            if (!turn.hasUncaredPendingTurn) return
+            viewModelScope.launch {
+                val app = getApplication<Application>()
+                val pendingSlot = turn.pendingSlotTime
+                if (!pendingSlot.isNullOrBlank()) {
+                    val todayKey = TurnResolver.todayKey()
+                    AppContainer.getInstance(app).preferencesDataStore
+                        .setDismissedSlotKey("${todayKey}_$pendingSlot")
+                }
+                TurnAlarmScheduler.cancelSnoozeReminder(app)
+                AppContainer.getInstance(app).preferencesDataStore.setSnoozeUntilMillis(null)
+                PetCareNotificationHelper.dismissAllTurnNotifications(app)
+                _events.emit("Ok, aviso encerrado neste dispositivo.")
+            }
+            return
+        }
+
+        val (slotTime, escalationId) = when (turn) {
             is TurnStatus.MyScheduledTurn -> turn.slotTime to null
             is TurnStatus.EscalatedToMe -> turn.escalation.slotTime to turn.escalation.id
             is TurnStatus.NotMyTurn -> return
@@ -253,8 +273,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 existingEscalationId = escalationId
             ).onSuccess { esc ->
                 val app = getApplication<Application>()
+                val todayKey = TurnResolver.todayKey()
+                AppContainer.getInstance(app).preferencesDataStore
+                    .setDismissedSlotKey("${todayKey}_$slotTime")
                 TurnAlarmScheduler.cancelSnoozeReminder(app)
                 AppContainer.getInstance(app).preferencesDataStore.setSnoozeUntilMillis(null)
+                PetCareNotificationHelper.dismissAllTurnNotifications(app)
                 if (esc.targetCaregiverName.isNotBlank()) {
                     _events.emit("Vez passada para ${esc.targetCaregiverName}.")
                 }

@@ -80,7 +80,9 @@ object TurnAlarmScheduler {
             val slotMillisToday = slotZonedToday.toInstant().toEpochMilli()
             val reminderMillisToday = slotMillisToday + TEN_MINUTES_MILLIS
 
-            val alreadyHandledToday = hasCaredForSlot(logs, slotTime, today, zoneId)
+            val alreadyHandledToday = hasCaredForSlot(logs, slotTime, today, zoneId) ||
+                hasDeclinedSlot(escalations, currentUser.id, slotTime, todayKey) ||
+                dismissedSlotKey == "${todayKey}_$slotTime"
 
             val nextSlotMillis: Long
             val nextReminderMillis: Long

@@ -35,10 +35,11 @@ class CheckinPetsApplication : Application(), Application.ActivityLifecycleCallb
         appScope.launch {
             combine(
                 container.repository.snapshot,
-                container.repository.linkedCaregiverId
-            ) { snapshot, linkedId ->
-                snapshot to linkedId
-            }.collect { (snapshot, linkedId) ->
+                container.repository.linkedCaregiverId,
+                container.preferencesDataStore.dismissedSlotKey
+            ) { snapshot, linkedId, dismissedKey ->
+                Triple(snapshot, linkedId, dismissedKey)
+            }.collect { (snapshot, linkedId, dismissedKey) ->
                 if (linkedId == null) {
                     TurnAlarmScheduler.cancelAll(applicationContext)
                     PetCareNotificationHelper.dismissAllTurnNotifications(applicationContext)
@@ -52,10 +53,12 @@ class CheckinPetsApplication : Application(), Application.ActivityLifecycleCallb
                         currentUser = user,
                         logs = snapshot.careLogs,
                         escalations = snapshot.escalations,
-                        allCaregivers = snapshot.caregivers
+                        allCaregivers = snapshot.caregivers,
+                        dismissedSlotKey = dismissedKey
                     )
 
                     val nowMillis = System.currentTimeMillis()
+                    val todayKey = com.app.check_inpets.domain.TurnResolver.todayKey(nowMillis)
                     val turnStatus = com.app.check_inpets.domain.TurnResolver.resolveTurnStatus(
                         currentUser = user,
                         allCaregivers = snapshot.caregivers,
@@ -63,12 +66,18 @@ class CheckinPetsApplication : Application(), Application.ActivityLifecycleCallb
                         todayEscalations = snapshot.escalations,
                         nowMillis = nowMillis
                     )
-                    val hasUncaredPending = when (turnStatus) {
-                        is com.app.check_inpets.model.TurnStatus.MyScheduledTurn -> true
+                    val hasPending = when (turnStatus) {
+                        is com.app.check_inpets.model.TurnStatus.MyScheduledTurn ->
+                            dismissedKey != "${todayKey}_${turnStatus.slotTime}"
                         is com.app.check_inpets.model.TurnStatus.EscalatedToMe -> true
-                        is com.app.check_inpets.model.TurnStatus.NotMyTurn -> turnStatus.hasUncaredPendingTurn
+                        is com.app.check_inpets.model.TurnStatus.NotMyTurn -> {
+                            val pendingSlot = turnStatus.pendingSlotTime
+                            turnStatus.hasUncaredPendingTurn &&
+                                pendingSlot != null &&
+                                dismissedKey != "${todayKey}_$pendingSlot"
+                        }
                     }
-                    if (!hasUncaredPending) {
+                    if (!hasPending) {
                         PetCareNotificationHelper.dismissAllTurnNotifications(applicationContext)
                     }
                 }

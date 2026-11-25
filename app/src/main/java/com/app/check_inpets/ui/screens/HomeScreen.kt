@@ -424,6 +424,27 @@ fun HomeScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        OutlinedButton(
+                            onClick = { showDeclineDialog = true },
+                            enabled = !isBusy,
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Close,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Não irei cuidar",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     } else {
                         TextButton(
                             onClick = { showEarlyCareDialog = true },

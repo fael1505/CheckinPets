@@ -201,7 +201,7 @@ object PetCareNotificationHelper {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_REMINDER_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Horário do cuidado")
+            .setContentTitle("Hora de cuidar dos cachorros")
             .setContentText(formattedSlot ?: "Agora")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)

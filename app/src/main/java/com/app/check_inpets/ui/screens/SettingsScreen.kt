@@ -318,7 +318,7 @@ fun SettingsScreen(
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "Versão atual: v${currentVersion.versionName} (${currentVersion.versionCode}) • Verificação diária às 12h",
+                            text = "Versão atual: v${currentVersion.versionName} • Verificação diária às 12h",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
